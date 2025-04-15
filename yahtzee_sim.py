@@ -5,6 +5,7 @@ from strategies import dice_driven, upper_focus, yahtzee_focus
 
 NUM_SIMULATIONS = 10000
 
+
 def simulate(strategy_func):
     results = []
     for _ in range(NUM_SIMULATIONS):
