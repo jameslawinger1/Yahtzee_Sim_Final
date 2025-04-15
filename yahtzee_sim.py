@@ -1,7 +1,7 @@
 import os
 import random
 import pandas as pd
-from strategies import dice_driven, upper_focus, yahtzee_focus
+from strategies import dice_driven, upper_focus, yahtzee_focus, hybrid_strategy
 
 NUM_SIMULATIONS = 10000
 
@@ -26,6 +26,9 @@ if __name__ == "__main__":
 
     print("💥 Simulating Yahtzee-Focus Strategy...")
     results['Yahtzee-Focus'] = simulate(yahtzee_focus.play_game)
+
+    print("🧠 Simulating Hybrid Strategy...")
+    results['Hybrid'] = simulate(hybrid_strategy.play_game)
 
     df = pd.DataFrame(results)
     print("✅ DataFrame created:")
