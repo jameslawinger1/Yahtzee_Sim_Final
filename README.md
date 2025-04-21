@@ -72,4 +72,5 @@ Spring 2025
 - https://solitaired.com/guides/yahtzee-strategy
 - https://www.dumbthoughtsthatmakemelaugh.com/blog/yahtzee-strategy
 - http://www.yahtzee.org.uk/strategy.html
+- https://chat.openai.com/ (Used for code refinement and documentation)
 
