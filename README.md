@@ -11,14 +11,14 @@ This project simulates games of Yahtzee using several strategies to evaluate the
 python yahtzee_simulator.py
 ```
 
-2. **Generate statistical plots and summary metrics:**
+2. **Generate statistical plots and summary metrics:** Open and run all cells in:
 ```bash
-python analysis.py
+analysis/analysis.ipynb
 ```
 
-3. **Perform head-to-head strategy comparison:**
+3. **Perform head-to-head strategy comparison:** Open and run all cells in: 
 ```bash
-python head_to_head.py
+analysis/head_to_head.ipynb
 ```
 
 Results and plots will be saved to `results/` and `plots/` directories, which are auto-created.
@@ -40,8 +40,8 @@ Results and plots will be saved to `results/` and `plots/` directories, which ar
 - **`dice_driven_strategy.py`**: Dynamically chooses a strategy based on the initial roll each turn.
 
 ### Analysis & Evaluation
-- **`analysis.py`**: Computes summary statistics (mean, median, standard deviation, confidence intervals), and generates histograms and a boxplot for all strategies.
-- **`head_to_head.py`**: Simulates head-to-head comparisons between all strategies, saves win rate matrix, and plots a heatmap.
+- **`analysis.ipynb`**: Jupyter notebook to compute summary statistics (mean, median, standard deviation, confidence intervals) and generate histograms and a boxplot for all strategies.
+- **`head_to_head.ipynb`**: Jupyter notebook that simulates head-to-head comparisons between strategies, saves win rate matrix, and plots a heatmap.
 
 ### Outputs
 - **`results/`**: Stores CSV files with raw scores, summary stats, and head-to-head win matrix.
@@ -56,7 +56,10 @@ Install dependencies via pip:
 ```bash
 pip install numpy pandas matplotlib
 ```
-
+To launch Jupyter: 
+```bash
+jupyter notebook
+```
 ---
 
 ## Authors
