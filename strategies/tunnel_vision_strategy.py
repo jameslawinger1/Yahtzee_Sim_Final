@@ -93,29 +93,32 @@ def find_best_initial_target(dice, available_categories):
     else:
         return 'chance' # Should not happen
 
-def dice_driven_strategy(dice, scorecard, simulator):
+def tunnel_vision_strategy(dice, scorecard, simulator):
     """
     A Yahtzee strategy that picks a target based on the initial roll,
     then rerolls specifically for that target.
     """
-    scorer = YahtzeeScorer()
     available_categories = [cat for cat, score in scorecard.items() if score is None]
+    straight_categories = ['small_straight', 'large_straight']
+    available_straight = [cat for cat in available_categories if cat in straight_categories]
+    straight_potential = [2 and 3, 3 and 4, 4 and 5]
+    upper_categories = ['ones', 'twos', 'threes', 'fours', 'fives', 'sixes']
+    available_upper = [cat for cat in available_categories if cat in upper_categories]
+    available_lower = [cat for cat in available_categories if cat not in upper_categories and cat != 'yahtzee'] # Exclude yahtzee if not scored
     
     # --- Determine Target Category based on Initial Roll ---
     initial_dice = list(dice) # The dice state *before* any rerolls in this turn
     target_category = find_best_initial_target(initial_dice, available_categories)
-    
-    current_dice = initial_dice # Start reroll process with initial dice
 
     # --- Rerolling Logic - Focused on the Target Category ---
     for roll_num in range(2): # Perform up to two rerolls
-        counts = Counter(current_dice)
+        counts = Counter(initial_dice)
         keep_indices = []
 
         # Determine dice to keep based *only* on the target_category
         if target_category in ['ones', 'twos', 'threes', 'fours', 'fives', 'sixes']:
             target_num = ['ones', 'twos', 'threes', 'fours', 'fives', 'sixes'].index(target_category) + 1
-            keep_indices = [i for i, die in enumerate(current_dice) if die == target_num]
+            keep_indices = [i for i, die in enumerate(initial_dice) if die == target_num]
         
         elif target_category == 'three_of_a_kind' or target_category == 'four_of_a_kind' or target_category == 'yahtzee':
             # Keep the dice that form the largest group
@@ -128,7 +131,7 @@ def dice_driven_strategy(dice, scorecard, simulator):
                  elif count == max_count and num > most_common_num: # Tie-break high
                      most_common_num = num
             if max_count > 0: # Should always be true unless hand is empty
-                 keep_indices = [i for i, die in enumerate(current_dice) if die == most_common_num]
+                 keep_indices = [i for i, die in enumerate(initial_dice) if die == most_common_num]
 
         elif target_category == 'full_house':
             # Keep all dice part of the best triple and best pair found
@@ -158,17 +161,17 @@ def dice_driven_strategy(dice, scorecard, simulator):
 
             # Keep dice matching the identified triple/pair values
             if found_triple:
-                 keep_indices.extend([i for i, die in enumerate(current_dice) if die == triple_val])
+                 keep_indices.extend([i for i, die in enumerate(initial_dice) if die == triple_val])
             if found_pair:
                  # Avoid adding same indices twice if pair_val is same as triple_val (e.g., Yahtzee)
-                 keep_indices.extend([i for i, die in enumerate(current_dice) if die == pair_val and i not in keep_indices])
+                 keep_indices.extend([i for i, die in enumerate(initial_dice) if die == pair_val and i not in keep_indices])
             # Remove duplicates just in case
             keep_indices = list(set(keep_indices))
 
 
         elif target_category == 'small_straight' or target_category == 'large_straight':
             # Keep the dice forming the longest straight sequence found
-            unique_sorted = sorted(list(set(current_dice)))
+            unique_sorted = sorted(list(set(initial_dice)))
             best_seq = []
             current_seq = []
             if unique_sorted:
@@ -187,7 +190,7 @@ def dice_driven_strategy(dice, scorecard, simulator):
             if best_seq:
                  temp_indices = []
                  needed = list(best_seq)
-                 for idx, die in enumerate(current_dice):
+                 for idx, die in enumerate(initial_dice):
                      if die in needed:
                          temp_indices.append(idx)
                          needed.remove(die) # Remove one instance
@@ -195,7 +198,7 @@ def dice_driven_strategy(dice, scorecard, simulator):
 
         elif target_category == 'chance':
             # Keep high dice (e.g., 4, 5, 6)
-            keep_indices = [i for i, die in enumerate(current_dice) if die >= 4]
+            keep_indices = [i for i, die in enumerate(initial_dice) if die >= 4]
 
 
         # --- Perform Reroll ---
@@ -208,9 +211,9 @@ def dice_driven_strategy(dice, scorecard, simulator):
 
         if dice_to_reroll_count > 0:
              simulator.hand.reroll(indices_to_reroll)
-             current_dice = list(simulator.hand.dice) # Update current_dice
+             initial_dice = list(simulator.hand.dice) # Update initial_dice
 
-    final_dice = tuple(current_dice)
+    final_dice = tuple(initial_dice)
 
     # --- Category Selection Logic ---
     # Score the category we originally targeted for this turn.
@@ -222,11 +225,11 @@ def dice_driven_strategy(dice, scorecard, simulator):
         best_fallback_score = -1
         best_fallback_category = None
         for category in available_categories:
-            score_method = getattr(scorer, f"score_{category}")
-            score = score_method(final_dice)
-            if score > best_fallback_score:
-                best_fallback_score = score
-                best_fallback_category = category
+            score_method = getattr(simulator.scorer, f"score_{category}")
+            score = score_method(dice)
+            if score > best_score:
+                best_score = score
+                best_category = category
         
         if best_fallback_category:
              return best_fallback_category, final_dice

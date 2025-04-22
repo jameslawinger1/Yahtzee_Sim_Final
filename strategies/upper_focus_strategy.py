@@ -7,7 +7,6 @@ def upper_focus_strategy(dice, scorecard, simulator):
     A Yahtzee strategy that prioritizes scoring in the upper section categories
     to achieve the bonus.
     """
-    
     available_categories = [cat for cat, score in scorecard.items() if score is None]
     upper_categories = ['ones', 'twos', 'threes', 'fours', 'fives', 'sixes']
     available_upper = [cat for cat in available_categories if cat in upper_categories]

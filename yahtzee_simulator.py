@@ -4,11 +4,12 @@ import csv
 import os
 from scoreboard import *
 from dice_rolling import *
-from strategies.greedy_strategy import greedy_strategy
+from strategies.multiples_strategy import multiples_strategy
+from strategies.multiples_strategy_plus import multiples_strategy_plus
 from strategies.upper_focus_strategy import upper_focus_strategy
-from strategies.lower_focus_strategy import lower_focus_strategy
+from strategies.straight_strategy import straight_strategy
 from strategies.yahtzee_focus_strategy import yahtzee_focus_strategy
-from strategies.dice_driven_strategy import dice_driven_strategy
+from strategies.tunnel_vision_strategy import tunnel_vision_strategy
 
 import random
 from collections import Counter
@@ -92,11 +93,12 @@ def process_strategy_results(strategy_name, strategy_func, simulator, num_simula
 
 # Define strategies and their names
 strategies = {
-    "Greedy": greedy_strategy,
+    "Multiples": multiples_strategy,
+    "Multiples+": multiples_strategy_plus,
+    "Straights": straight_strategy,
     "Upper Focus": upper_focus_strategy,
-    "Lower Focus": lower_focus_strategy,
     "Yahtzee Focus": yahtzee_focus_strategy,
-    "Dice-Driven": dice_driven_strategy
+    "Tunnel Vision": tunnel_vision_strategy
 }
 
 # Running the simluations

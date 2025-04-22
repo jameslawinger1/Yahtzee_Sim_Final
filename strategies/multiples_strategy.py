@@ -1,6 +1,11 @@
 from collections import Counter
+import random
 
-def greedy_strategy(dice, scorecard, simulator):
+def multiples_strategy(dice, scorecard, simulator):
+    """
+    A Yahtzee strategy that prios looking for common dice values
+    then rerolls specifically for more of that value.
+    """
     available_categories = [cat for cat, score in scorecard.items() if score is None]
     straight_categories = ['small_straight', 'large_straight']
     available_straight = [cat for cat in available_categories if cat in straight_categories]
@@ -85,7 +90,20 @@ def greedy_strategy(dice, scorecard, simulator):
 
     # If no suitable category was found (e.g., all filled or errors), choose the first available one to score 0
     if best_category is None and available_categories:
-        best_category = available_categories[0]
+         # Try to zero out a less valuable category first.
+         if available_upper:
+             # Zero out the lowest available upper category first
+             best_category = min(available_upper, key=lambda cat: simulator.upper_categories.index(cat))
+         elif available_lower:
+              # Zero out 'chance' or 'three_of_a_kind' if available
+              if 'chance' in available_lower: best_category = 'chance'
+              elif 'three_of_a_kind' in available_lower: best_category = 'three_of_a_kind'
+              else: best_category = random.choice(available_lower) # Random lower if others taken
+         elif 'yahtzee' in available_categories: # Only remaining option is Yahtzee, score 0
+              best_category = 'yahtzee'
+         else:
+              # Should not happen in a normal game
+              return 'chance', dice # Absolute fallback
     
     # Return the chosen category and the final state of the dice
     return best_category, dice
