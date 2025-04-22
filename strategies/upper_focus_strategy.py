@@ -1,22 +1,22 @@
 import random
 from collections import Counter
-from scoreboard import YahtzeeScorer # Assuming YahtzeeScorer is accessible
+from scoreboard import YahtzeeScorer
 
 def upper_focus_strategy(dice, scorecard, simulator):
     """
     A Yahtzee strategy that prioritizes scoring in the upper section categories
     to achieve the bonus.
     """
-    scorer = YahtzeeScorer()
+    
     available_categories = [cat for cat, score in scorecard.items() if score is None]
     upper_categories = ['ones', 'twos', 'threes', 'fours', 'fives', 'sixes']
     available_upper = [cat for cat in available_categories if cat in upper_categories]
+    available_lower = [cat for cat in available_categories if cat not in upper_categories and cat != 'yahtzee'] # Exclude yahtzee if not scored
 
-    current_dice = list(dice)
     
     # --- Rerolling Logic ---
     for roll_num in range(2): # Perform up to two rerolls
-        counts = Counter(current_dice)
+        counts = Counter(dice)
         keep_indices = []
 
         # Determine best upper category target currently available
@@ -28,20 +28,19 @@ def upper_focus_strategy(dice, scorecard, simulator):
                  if num_str in available_upper:
                      best_target_num = num
                      break
-        
+
         # Keep dice matching the best target number
         if best_target_num > 0:
-            for i, die in enumerate(current_dice):
+            for i, die in enumerate(dice):
                 if die == best_target_num:
                     keep_indices.append(i)
-        
-        # If no upper target or no dice match, maybe keep high dice for other categories?
-        # For simplicity now, if no upper target, we won't specifically keep anything, leading to a full reroll.
-        # Or, if we kept some dice, reroll the rest.
 
+
+        # --- Perform Reroll ---
         dice_to_reroll_count = 5 - len(keep_indices)
         
-        if dice_to_reroll_count == 0: # Already keeping all dice
+        # No dice to reroll (all kept)
+        if dice_to_reroll_count == 0: 
              break
         
         # Determine indices to reroll
@@ -50,46 +49,49 @@ def upper_focus_strategy(dice, scorecard, simulator):
         if dice_to_reroll_count > 0:
              # Use the correct reroll method from YahtzeeHand
              simulator.hand.reroll(indices_to_reroll)
-             current_dice = list(simulator.hand.dice) # Update current_dice after reroll
+             dice = list(simulator.hand.dice) 
 
-        if not available_upper and roll_num == 0: # If no upper categories left on first reroll, maybe stop early?
-             pass # Continue rerolling for potentially good lower scores
-
-    final_dice = tuple(current_dice)
-
-    # --- Category Selection Logic ---
+    # --- Scoring Logic ---
     best_score = -1
     best_category = None
 
     # Prioritize available upper categories
     if available_upper:
         for category in available_upper:
-            score_method = getattr(scorer, f"score_{category}")
-            score = score_method(final_dice)
-            # Try to score *something* in the target category if possible
+            score_method = getattr(simulator.scorer, f"score_{category}")
+            score = score_method(dice)
             target_num = ['ones', 'twos', 'threes', 'fours', 'fives', 'sixes'].index(category) + 1
-            if counts.get(target_num, 0) > 0 and score > best_score: # Ensure we actually have dice for the category
-                 # Heuristic: Prefer filling the category even if score is low, if it's an upper one?
-                 # Let's stick to highest score for now.
+            # If we have at least one of the dice in the category and score is better than current best
+            if counts.get(target_num, 0) > 0 and score > best_score: 
                  best_score = score
                  best_category = category
 
     # If no suitable upper category found or scored, consider all available categories
     if best_category is None:
-        best_score = -1 # Reset best score search
+        best_score = -1 
         for category in available_categories:
-            score_method = getattr(scorer, f"score_{category}")
-            score = score_method(final_dice)
+            score_method = getattr(simulator.scorer, f"score_{category}")
+            score = score_method(dice)
+            # If score is better than current best then update
             if score > best_score:
                 best_score = score
                 best_category = category
 
-    # If still no category found (e.g., all scores are 0), pick a random available one
+    # If no category yields a score > 0 (or all taken), pick a category to zero out
     if best_category is None:
-        if available_categories:
-             best_category = random.choice(available_categories)
-        else:
-             # This case shouldn't happen in a normal 13-round game
-             return 'chance', final_dice # Fallback
+         # Try to zero out a less valuable category first.
+         if available_upper:
+             # Zero out the lowest available upper category first
+             best_category = min(available_upper, key=lambda cat: simulator.upper_categories.index(cat))
+         elif available_lower:
+              # Zero out 'chance' or 'three_of_a_kind' if available
+              if 'chance' in available_lower: best_category = 'chance'
+              elif 'three_of_a_kind' in available_lower: best_category = 'three_of_a_kind'
+              else: best_category = random.choice(available_lower) # Random lower if others taken
+         elif 'yahtzee' in available_categories: # Only remaining option is Yahtzee, score 0
+              best_category = 'yahtzee'
+         else:
+              # Should not happen in a normal game
+              return 'chance', dice # Absolute fallback
 
-    return best_category, final_dice
+    return best_category, dice
