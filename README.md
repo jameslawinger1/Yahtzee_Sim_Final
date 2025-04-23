@@ -33,11 +33,11 @@ Results and plots will be saved to `results/` and `plots/` directories, which ar
 - **`dice_rolling.py`**: Manages dice rolling and rerolling logic.
 
 ### Strategy Modules (in `strategies/` folder)
-- **`greedy_strategy.py`**: Always picks the category with the highest score after each roll.
+- **`multiples_strategy.py`**: Always picks the category with the highest score after each roll.
+- **`multiples_plus_strategy.py`**: Always picks the category with the highest score after each roll with added zero out logic
 - **`upper_focus_strategy.py`**: Focuses on maximizing upper section scores (1s-6s) to earn the 35-point bonus.
-- **`lower_focus_strategy.py`**: Prioritizes scoring lower section categories (e.g., straights, full house, Yahtzee).
 - **`yahtzee_focus_strategy.py`**: Aggressively targets Yahtzee rolls even at the expense of consistency.
-- **`dice_driven_strategy.py`**: Dynamically chooses a strategy based on the initial roll each turn.
+- **`tunnel_vision_strategy.py`**: Dynamically chooses a strategy based on the initial roll each turn.
 
 ### Analysis & Evaluation
 - **`analysis.ipynb`**: Jupyter notebook to compute summary statistics (mean, median, standard deviation, confidence intervals) and generate histograms and a boxplot for all strategies.

@@ -95,7 +95,7 @@ def process_strategy_results(strategy_name, strategy_func, simulator, num_simula
 strategies = {
     "Multiples": multiples_strategy,
     "Multiples+": multiples_strategy_plus,
-    "Straights": straight_strategy,
+    "Straights": straight_strategy, 
     "Upper Focus": upper_focus_strategy,
     "Yahtzee Focus": yahtzee_focus_strategy,
     "Tunnel Vision": tunnel_vision_strategy
